@@ -12,6 +12,14 @@ model Meeting {
   title       String
   body        String
   meetingDate DateTime
+  tags        Tag[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  meetings  Meeting[]
+  createdAt DateTime  @default(now())
 }

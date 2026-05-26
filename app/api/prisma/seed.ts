@@ -14,6 +14,7 @@ Main focus areas:
 
 Action items assigned to team leads. Next sync on Friday.`,
     meetingDate: new Date('2026-04-15T10:00:00+09:00'),
+    tags: ['sprint', 'planning'],
   },
   {
     title: 'Tech Stack Review',
@@ -24,6 +25,7 @@ Conclusions:
 - Evaluate Prisma alternatives in Q3
 - Postgres upgrade scheduled for next quarter`,
     meetingDate: new Date('2026-04-12T14:30:00+09:00'),
+    tags: ['engineering', 'architecture'],
   },
   {
     title: 'Customer Feedback Discussion',
@@ -36,6 +38,7 @@ Top 3 pain points:
 
 Action: prioritize these for next sprint.`,
     meetingDate: new Date('2026-04-10T11:00:00+09:00'),
+    tags: ['customer', 'product'],
   },
   {
     title: 'Detailed Quarterly Business Review with Multiple Stakeholders Including Executive Leadership and Department Heads',
@@ -51,6 +54,7 @@ Challenges discussed:
 - Some users report data inconsistencies
 - Mobile experience needs work`,
     meetingDate: new Date('2026-04-08T09:00:00+09:00'),
+    tags: ['business', 'executive'],
   },
   {
     title: 'Engineering Sync',
@@ -65,6 +69,7 @@ Blockers:
 - Need DBA review for migration script
 - Waiting on design for new search UI`,
     meetingDate: new Date('2026-04-05T16:00:00+09:00'),
+    tags: ['engineering', 'sync'],
   },
   {
     title: 'Design Review: Search Feature',
@@ -77,6 +82,7 @@ Decisions:
 
 Next: prototype by end of week.`,
     meetingDate: new Date('2026-04-03T13:00:00+09:00'),
+    tags: ['design', 'product'],
   },
   {
     title: 'On-call Postmortem: API Latency Spike',
@@ -90,6 +96,7 @@ Action items:
 - Add latency monitoring alerts
 - Review other heavy queries for similar issues`,
     meetingDate: new Date('2026-04-01T10:30:00+09:00'),
+    tags: ['engineering', 'incident'],
   },
   {
     title: '1on1 with Manager',
@@ -102,6 +109,7 @@ Topics covered:
 
 Next 1on1: in 2 weeks.`,
     meetingDate: new Date('2026-03-28T15:00:00+09:00'),
+    tags: ['1on1', 'career'],
   },
   {
     title: 'Product Roadmap Planning',
@@ -114,6 +122,7 @@ Big bets:
 
 Need to align with sales team on enterprise features.`,
     meetingDate: new Date('2026-03-25T10:00:00+09:00'),
+    tags: ['product', 'planning'],
   },
   {
     title: 'Sprint Retrospective',
@@ -127,6 +136,7 @@ What could improve:
 
 Action items: timebox estimation sessions, set up review SLA.`,
     meetingDate: new Date('2026-03-22T14:00:00+09:00'),
+    tags: ['sprint', 'retro'],
   },
   {
     title: 'Hiring Loop Sync',
@@ -139,6 +149,7 @@ Decisions:
 
 Next steps: extend offer to A by Friday.`,
     meetingDate: new Date('2026-03-20T11:00:00+09:00'),
+    tags: ['hiring', 'engineering'],
   },
   {
     title: 'Vendor Evaluation: Monitoring Tools',
@@ -151,6 +162,7 @@ Shortlist:
 
 Recommendation: pilot New Relic for 1 month.`,
     meetingDate: new Date('2026-03-18T13:30:00+09:00'),
+    tags: ['engineering', 'vendor'],
   },
 ]
 
@@ -162,9 +174,20 @@ async function main() {
   }
 
   for (const m of sampleMeetings) {
-    await prisma.meeting.create({ data: m })
+    const { tags, ...meetingData } = m
+    await prisma.meeting.create({
+      data: {
+        ...meetingData,
+        tags: {
+          connectOrCreate: tags.map((tagName) => ({
+            where: { name: tagName },
+            create: { name: tagName },
+          })),
+        },
+      },
+    })
   }
-  console.log(`Seeded ${sampleMeetings.length} meetings`)
+  console.log(`Seeded ${sampleMeetings.length} meetings with tags`)
 }
 
 main()
